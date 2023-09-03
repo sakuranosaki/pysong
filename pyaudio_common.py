@@ -2,8 +2,10 @@ import math
 
 WAV_FREQ = 44100
 
+
 def ratio_from_gain(gain):
     return math.pow(10, gain / 20)
+
 
 def biquad_equalizer(data, freq, q, gain):
     a = math.pow(10, gain / 40)
@@ -21,8 +23,15 @@ def biquad_equalizer(data, freq, q, gain):
         if i < 2:
             out.append(data[i])
         else:
-            out.append((b0 / a0) * data[i] + (b1 / a0) * data[i-1] + (b2 / a0) * data[i-2] - (a1 / a0) * out[i-1] - (a2 / a0) * out[i-2])
+            out.append(
+                (b0 / a0) * data[i]
+                + (b1 / a0) * data[i - 1]
+                + (b2 / a0) * data[i - 2]
+                - (a1 / a0) * out[i - 1]
+                - (a2 / a0) * out[i - 2]
+            )
     return out
+
 
 def biquad_lowpass(data, freq, q):
     w0 = 2 * math.pi * freq / WAV_FREQ
@@ -39,8 +48,15 @@ def biquad_lowpass(data, freq, q):
         if i < 2:
             out.append(data[i])
         else:
-            out.append((b0 / a0) * data[i] + (b1 / a0) * data[i-1] + (b2 / a0) * data[i-2] - (a1 / a0) * out[i-1] - (a2 / a0) * out[i-2])
+            out.append(
+                (b0 / a0) * data[i]
+                + (b1 / a0) * data[i - 1]
+                + (b2 / a0) * data[i - 2]
+                - (a1 / a0) * out[i - 1]
+                - (a2 / a0) * out[i - 2]
+            )
     return out
+
 
 def soft_limit(data, threshold_gain):
     out = []

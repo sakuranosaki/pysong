@@ -1,6 +1,7 @@
 import math
 import random
 import pyaudio_common as common
+from pyoscillator import Oscillator as osc
 
 
 class PySynth:
@@ -12,13 +13,13 @@ class PySynth:
 
     attack = 0.0  # sec
     decay = 0.2  # sec
-    sustain = -6 # dB
-    release = 0.1 # sec
-    
-    glide_head = 0.2 # sec
-    glide_tail = 0.2 # sec        
+    sustain = -6  # dB
+    release = 0.1  # sec
 
-    detune = 0.0 # semitone]
+    glide_head = 0.2  # sec
+    glide_tail = 0.2  # sec
+
+    detune = 0.0  # semitone]
     ring_mod_mix = 0
     ring_mod_freq_ratio = 5.5
 
@@ -29,26 +30,11 @@ class PySynth:
         theta = math.fmod(theta, 2 * math.pi)
         result = 0.0
         result += math.sin(theta) * self.mix_sin
-        result += PySynth._square(theta) * self.mix_square 
-        result += PySynth._saw(theta) * self.mix_saw
-        result += PySynth._triangle(theta) * self.mix_triangle
-        result += random.random() * self.mix_noise
+        result += osc.square(theta) * self.mix_square
+        result += osc.saw(theta) * self.mix_saw
+        result += osc.triangle(theta) * self.mix_triangle
+        result += osc.noise() * self.mix_noise
         return result
-
-    def _saw(t):
-        if t < math.pi:
-            return t / math.pi
-        else:
-            return -1 + ((t - math.pi) / math.pi)
-
-    def _square(t):
-        if t < math.pi:
-            return 1
-        else:
-            return -1
-
-    def _triangle(t):
-        return (math.acos(math.cos(t)) / math.pi - 0.5) * 2
 
     def create_notes(self, notes, duration):
         data = [0] * int(common.WAV_FREQ * (duration + self.release))
@@ -76,7 +62,9 @@ class PySynth:
                 r = i / (common.WAV_FREQ * self.glide_head)
                 freq = (1 - r) * base_freq / 2 + r * base_freq
             elif i > common.WAV_FREQ * (total_duration - self.glide_tail):
-                r = (i - common.WAV_FREQ * (total_duration - self.glide_tail)) / (self.glide_tail * common.WAV_FREQ)
+                r = (i - common.WAV_FREQ * (total_duration - self.glide_tail)) / (
+                    self.glide_tail * common.WAV_FREQ
+                )
                 freq = (1 - r) * base_freq + r * (base_freq / 2)
             elif i > vib_start:
                 freq = base_freq + math.sin(i / common.WAV_FREQ * math.pi * 2 * 7) * 5
@@ -111,13 +99,15 @@ class PySynth:
                 data[i] *= common.ratio_from_gain(-60 * r + self.sustain)
 
         return data
-    
+
     def _apply_am(self, data, freq):
         for i in range(len(data)):
-            n = data[i] * math.sin(2 * math.pi * i * freq * self.ring_mod_freq_ratio / common.WAV_FREQ)
-            data[i] = data[i] * (1-self.ring_mod_mix) + n * self.ring_mod_mix
+            n = data[i] * math.sin(
+                2 * math.pi * i * freq * self.ring_mod_freq_ratio / common.WAV_FREQ
+            )
+            data[i] = data[i] * (1 - self.ring_mod_mix) + n * self.ring_mod_mix
         return data
-            
+
     def freq_from_note(note: str, octave_shift: int = 0):
         notes = {
             "C": 0,
@@ -143,4 +133,3 @@ class PySynth:
         oct = int(oct)
         oct += octave_shift
         return 36.708 * math.pow(2, (notes[height] + oct * 12) / 12)
-

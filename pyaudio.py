@@ -51,21 +51,21 @@ def make_song():
     
     channel_master = Channel(SONG_BPM, total_bar, "./song.wav", 2, False)
     for ch in range(2):
-        channel_master.add(channel_dr.data[0], 0, 0, 0, -2, ch)
-        channel_master.add(channel_bass.data[0], 0, 0, 0, 1, ch)
-        channel_master.add(channel_melody.data[0], 0, 0, 0, 0, ch)
-        channel_master.add(channel_melody_rm.data[0], 0, 0, 0, -2, ch)
-        channel_master.add(channel_pico.data[0], 0, 0, 0, -2, ch)
+        channel_master.add(channel_dr.channels[0], 0, 0, 0, -2, ch)
+        channel_master.add(channel_bass.channels[0], 0, 0, 0, 1, ch)
+        channel_master.add(channel_melody.channels[0], 0, 0, 0, 0, ch)
+        channel_master.add(channel_melody_rm.channels[0], 0, 0, 0, -2, ch)
+        channel_master.add(channel_pico.channels[0], 0, 0, 0, -2, ch)
 
-    channel_master.add(channel_chordL.data[0], 0, 0, 0, -8, 0)
-    channel_master.add(channel_chordR.data[0], 0, 0, 0, -8, 1)
+    channel_master.add(channel_chordL.channels[0], 0, 0, 0, -8, 0)
+    channel_master.add(channel_chordR.channels[0], 0, 0, 0, -8, 1)
     
     channel_master.equalizer(2000, 0.3, 3)
     channel_master.lowpass(20000, 0.3)
     channel_master.soft_limit(-8)
     
     channel_master.normalize()
-    channel_master.fade_out(len(channel_master.data[0]) / 44100 - 10)
+    channel_master.fade_out(len(channel_master.channels[0]) / 44100 - 10)
     channel_master.write()
 
 def calc_pico_channel(channel : Channel):
